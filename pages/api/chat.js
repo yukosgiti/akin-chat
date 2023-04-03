@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma"
 import { format } from "date-fns"
+import { utcToZonedTime } from 'date-fns-tz'
+
 
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
@@ -35,7 +37,7 @@ export default async function handler(req, res) {
   })
   response.sort(function (a, b) { return a.createdAt.getTime() - b.createdAt.getTime() });
 
-  const pruned = response.map(item => ({ name: item.by, message: item.text, timestamp: format(item.createdAt, "yyyy-MM-dd HH:mm:ss") }))
+  const pruned = response.map(item => ({ name: item.by, message: item.text, timestamp: format(utcToZonedTime(item.createdAt, "Europe/Istanbul"), "yyyy-MM-dd HH:mm:ss") }))
   res.status(200).json(pruned)
   return
 }
