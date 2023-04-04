@@ -7,19 +7,20 @@ import { utcToZonedTime } from 'date-fns-tz'
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    console.log(req.body)
-    const { name, message } = req.body
-    console.log(name, message)
+    console.log({ body: req.body.id })
+    const { id, message } = req.body
+    console.log(id, message)
     await prisma.message.create({
       data: {
-        by: name,
+        by: id,
         text: message,
       },
     })
-    res.status(200).json({ message: "ok" })
-    return
+    // res.status(200).json({ message: "ok" })
+    return res.redirect(307, '/chat?id=' + req.body.id)
   } else if (req.method === 'DELETE') {
     await prisma.message.deleteMany()
+
     res.status(200).json({ message: "ok" })
     return
   }
