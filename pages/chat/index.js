@@ -80,7 +80,7 @@ export default function Chat({ id, chat }) {
         </div>
         <div className="h-8 mx-auto w-fit">
           <button type="submit" className={`m-4 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}  rounded-md`} >send</button>
-          <button className={`m-4 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}  rounded-md`} onClick={() => refreshChat()}>refresh</button>
+          <button type="button" className={`m-4 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}  rounded-md`} onClick={() => refreshChat()}>refresh</button>
           <Link href={"/"} className={`m-4 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}`} >
             Ev
           </Link>
