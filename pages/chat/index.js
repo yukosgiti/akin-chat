@@ -1,14 +1,15 @@
 import { format, } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { prisma } from "../../lib/prisma";
-
+import Link from "next/link";
 export default function Chat({ id, chat }) {
-  const [message, setMessage] = useState("");
+  const [message2, setMessage] = useState("");
   const [onlineChat, setOnlineChat] = useState(chat);
   const inputRef = React.useRef(null);
 
-  function sendMessage(message) {
-    inputRef.current.focus()
+  function sendMessage() {
+    // inputRef.current.focus()
+    const message = prompt("Enter your message");
     if (message === "") return;
 
     const xhr = new XMLHttpRequest();
@@ -70,14 +71,17 @@ export default function Chat({ id, chat }) {
     </div>
     <div className={`h-8  mx-auto ${id === "Aslan" ? "bg-blue-500" : "bg-pink-500"}`}>
       <div className="w-fit mx-auto">
-        <input ref={inputRef} type="text" className="mt-1" placeholder="chat here" value={message} onChange={e => setMessage(e.target.value)} />
+        {/* <input ref={inputRef} type="text" className="mt-1" placeholder="chat here" value={message} onChange={e => setMessage(e.target.value)} /> */}
       </div>
       <div className="h-8 mx-auto w-fit">
-        <button className={`m-2 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}  rounded-md`} onClick={() => sendMessage(message)}>send</button>
-        <button className={`m-2 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}  rounded-md`} onClick={() => refreshChat()}>refresh</button>
+        <button className={`m-4 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}  rounded-md`} onClick={() => sendMessage()}>send</button>
+        <button className={`m-4 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}  rounded-md`} onClick={() => refreshChat()}>refresh</button>
+        <Link href={"/"} className={`m-4 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}`} >
+          Ev
+        </Link>
       </div>
     </div>
-  </div>)
+  </div >)
 }
 
 //server props
