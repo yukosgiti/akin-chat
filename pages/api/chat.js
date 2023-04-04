@@ -8,7 +8,7 @@ import { utcToZonedTime } from 'date-fns-tz'
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     console.log(req.body)
-    const { name, message } = JSON.parse(req.body)
+    const { name, message } = req.body
     console.log(name, message)
     await prisma.message.create({
       data: {
@@ -26,6 +26,7 @@ export default async function handler(req, res) {
 
   let response = await prisma.message.findMany({
     select: {
+      id: true,
       by: true,
       text: true,
       createdAt: true
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
   })
   response.sort(function (a, b) { return a.createdAt.getTime() - b.createdAt.getTime() });
 
-  const pruned = response.map(item => ({ name: item.by, message: item.text, timestamp: format(utcToZonedTime(item.createdAt, "Europe/Istanbul"), "yyyy-MM-dd HH:mm:ss") }))
+  const pruned = response.map(item => ({ id: item.id, name: item.by, message: item.text, timestamp: format(utcToZonedTime(item.createdAt, "Europe/Istanbul"), "yyyy-MM-dd HH:mm:ss") }))
   res.status(200).json(pruned)
   return
 }

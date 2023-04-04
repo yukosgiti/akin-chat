@@ -1,30 +1,57 @@
 import { format, } from "date-fns";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { prisma } from "../../lib/prisma";
+
 export default function Chat({ id, chat }) {
   const [message, setMessage] = useState("");
   const [onlineChat, setOnlineChat] = useState(chat);
   const inputRef = React.useRef(null);
 
-  async function sendMessage(message) {
+  function sendMessage(message) {
     inputRef.current.focus()
     if (message === "") return;
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      body: JSON.stringify({
-        name: id,
-        message,
-      })
-    })
-    setMessage("")
-    await refreshChat()
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/chat");
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          setMessage("")
+          refreshChat()
+        } else {
+          console.log("Error: " + xhr.status);
+        }
+      }
+    };
+    xhr.send(JSON.stringify({
+      name: id,
+      message,
+    }));
   }
 
-  async function refreshChat() {
-    const response = await fetch("/api/chat")
-    const result = await response.json()
-    setOnlineChat(result)
+  function refreshChat() {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "/api/chat");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          const result = JSON.parse(xhr.responseText);
+          setOnlineChat(result);
+        } else {
+          console.log("Error: " + xhr.status);
+        }
+      }
+    };
+    xhr.send();
   }
+  //refresh chat every 3 seconds with use effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshChat()
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (<div className="w-full h-full bg-gray-100">
     <div>
@@ -41,13 +68,13 @@ export default function Chat({ id, chat }) {
       })
       }
     </div>
-    <div className="h-8 bg-blue-500 mx-auto">
+    <div className={`h-8  mx-auto ${id === "Aslan" ? "bg-blue-500" : "bg-pink-500"}`}>
       <div className="w-fit mx-auto">
         <input ref={inputRef} type="text" className="mt-1" placeholder="chat here" value={message} onChange={e => setMessage(e.target.value)} />
       </div>
       <div className="h-8 mx-auto w-fit">
-        <button className="m-2 p-2 border-2 border-blue-500 rounded-md" onClick={() => sendMessage(message)}>send</button>
-        <button className="m-2 p-2 border-2 border-blue-500 rounded-md" onClick={() => refreshChat()}>refresh</button>
+        <button className={`m-2 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}  rounded-md`} onClick={() => sendMessage(message)}>send</button>
+        <button className={`m-2 p-2 border-2 ${id === "Aslan" ? "border-blue-500" : "border-pink-500"}  rounded-md`} onClick={() => refreshChat()}>refresh</button>
       </div>
     </div>
   </div>)
@@ -59,6 +86,7 @@ export async function getServerSideProps(context) {
   const { id } = query;
   let response = await prisma.message.findMany({
     select: {
+      id: true,
       by: true,
       text: true,
       createdAt: true
@@ -70,7 +98,7 @@ export async function getServerSideProps(context) {
   })
   response.sort(function (a, b) { return a.createdAt.getTime() - b.createdAt.getTime() });
 
-  const pruned = response.map(item => ({ name: item.by, message: item.text, timestamp: format(item.createdAt, "yyyy-MM-dd HH:mm:ss") }))
+  const pruned = response.map(item => ({ id: item.id, name: item.by, message: item.text, timestamp: format(item.createdAt, "yyyy-MM-dd HH:mm:ss") }))
 
 
   return {
